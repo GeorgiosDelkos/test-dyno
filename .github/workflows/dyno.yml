@@ -81,7 +81,7 @@ jobs:
     - name: Install Dyno Site
       run: |
         cd /home/runner/work/
-        git clone https://github.com/ourovoros.io/dynosite.git
+        git clone https://github.com/ourovoros-io/dynosite.git
         cd dynosite
         cargo build --release
 
