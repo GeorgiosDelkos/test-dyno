@@ -5,6 +5,7 @@ on:
     types:
       - opened
 
+      
 jobs:
   run-dyno:
     if: ${{ github.event.pull_request.merged == false }}
