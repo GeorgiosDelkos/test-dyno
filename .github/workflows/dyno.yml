@@ -65,7 +65,7 @@ jobs:
 
     - name: Clone target repository
       run: |
-        git clone https://github.com/${{ env.TARGET_REPO }} target-repo
+        git clone ${{ env.TARGET_REPO }} target-repo
         cd target-repo
         git config user.name "github-actions"
         git config user.email "github-actions@github.com"
@@ -73,7 +73,7 @@ jobs:
     - name: Find latest JSON file
       id: find_latest_json
       run: |
-        LATEST_JSON=$(ls -t target-repo/site/data/folder/runs/*.json | head -n 1)
+        LATEST_JSON=$(ls -t target-repo/site/data/runs/*.json | head -n 1)
         echo "LATEST_JSON=$LATEST_JSON" >> $GITHUB_ENV
 
     - name: Install dyno tool
