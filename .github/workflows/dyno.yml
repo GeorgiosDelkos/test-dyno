@@ -54,7 +54,7 @@ jobs:
         echo "PR_HASH=$PR_HASH" >> $GITHUB_ENV
 
     - name: Get PR title and URL
-      id: get_pr_details
+      id: get_pr_details 
       run: |
         PR_DETAILS=$(curl -s -H "Authorization: token ${{ env.GITHUB_TOKEN }}" \
         "https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.pull_request.head.repo.name }}/pulls/${{ env.PR_NUMBER }}")
