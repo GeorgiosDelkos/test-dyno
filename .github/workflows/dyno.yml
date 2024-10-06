@@ -5,14 +5,13 @@ on:
     types:
       - opened
 
-      
 jobs:
   run-dyno:
     if: ${{ github.event.pull_request.merged == false }}
     runs-on: ubuntu-latest
 
     env:
-      GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TARGET_REPO: ${{ secrets.TARGET_REPO }}
 
     steps:
@@ -57,12 +56,25 @@ jobs:
     - name: Get PR title and URL
       id: get_pr_details
       run: |
-        PR_DETAILS=$(curl -s -H "Authorization: token ${{ env.GITHUB_TOKEN }}" \
+        PR_DETAILS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
         "https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.pull_request.head.repo.name }}/pulls/${{ env.PR_NUMBER }}")
         PR_TITLE=$(echo "$PR_DETAILS" | jq -r '.title')
         PR_URL=$(echo "$PR_DETAILS" | jq -r '.html_url')
         echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
         echo "PR_URL=$PR_URL" >> $GITHUB_ENV
+
+    - name: Clone target repository
+      run: |
+        git clone https://github.com/${{ env.TARGET_REPO }} target-repo
+        cd target-repo
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+
+    - name: Find latest JSON file
+      id: find_latest_json
+      run: |
+        LATEST_JSON=$(ls -t target-repo/site/data/folder/runs/*.json | head -n 1)
+        echo "LATEST_JSON=$LATEST_JSON" >> $GITHUB_ENV
 
     - name: Install dyno tool
       run: |
@@ -74,10 +86,15 @@ jobs:
         cargo build --release
         cp target/release/dyno /home/runner/work/
 
+    - name: Copy latest JSON to dyno folder
+      run: |
+        mkdir -p /home/runner/work/benchmarks/runs
+        cp ${{ env.LATEST_JSON }} /home/runner/work/benchmarks/runs/
+
     - name: Run dyno tool
       run: |
         cd /home/runner/work/
-        ./dyno -t test-dyno/test-dyno/test/src/sdk-harness/test_projects/ -f test-dyno/test-dyno/target/release/forc
+        ./dyno -t dyno-test/dyno-test/test/src/sdk-harness/test_projects/ -f dyno-test/dyno-test/target/release/forc
 
     - name: Install Dyno Site
       run: |
@@ -90,13 +107,6 @@ jobs:
       run: |
         cd /home/runner/work/ 
         ./dynosite/target/release/dynosite -b /home/runner/work/benchmarks -p "${{ env.PR_HASH }}" -t "${{ env.PR_TITLE }}" -l "${{ env.PR_URL }}"
-
-    - name: Clone target repository
-      run: |
-        git clone https://github.com/${{ env.TARGET_REPO }} target-repo
-        cd target-repo
-        git config user.name "github-actions"
-        git config user.email "github-actions@github.com"
 
     - name: Copy generated files
       run: |
