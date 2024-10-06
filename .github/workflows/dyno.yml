@@ -96,6 +96,7 @@ jobs:
         cd /home/runner/work/
         ./dyno -t dyno-test/dyno-test/test/src/sdk-harness/test_projects/ -f dyno-test/dyno-test/target/release/forc
 
+
     - name: Install Dyno Site
       run: |
         cd /home/runner/work/
