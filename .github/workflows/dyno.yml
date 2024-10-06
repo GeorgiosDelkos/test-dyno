@@ -45,7 +45,7 @@ jobs:
 
     - name: Build sway
       run: |
-        cargo build --release --features profile
+        cargo build --release --features profiler
         
     - name: Extract PR hash
       id: extract_pr_hash
